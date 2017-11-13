@@ -13,7 +13,9 @@ import Photos
 class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
     
     var selectedAssets = [TLPHAsset]()
-
+    @IBOutlet var label: UILabel!
+    @IBOutlet var imageView: UIImageView!
+    
     @IBAction func pickerButtonTap() {
         let viewController = CustomPhotoPickerViewController()
         viewController.delegate = self
@@ -29,6 +31,22 @@ class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
         viewController.configure = configure
         viewController.selectedAssets = self.selectedAssets
 
+        self.present(viewController, animated: true, completion: nil)
+    }
+    
+    @IBAction func pickerWithCustomCameraCell() {
+        let viewController = CustomPhotoPickerViewController()
+        viewController.delegate = self
+        viewController.didExceedMaximumNumberOfSelection = { [weak self] (picker) in
+            self?.showAlert(vc: picker)
+        }
+        var configure = TLPhotosPickerConfigure()
+        configure.numberOfColumn = 3
+        if #available(iOS 10.2, *) {
+            configure.cameraCellNibSet = (nibName: "CustomCameraCell", bundle: Bundle.main)
+        }
+        viewController.configure = configure
+        viewController.selectedAssets = self.selectedAssets
         self.present(viewController.wrapNavigationControllerWithoutBar(), animated: true, completion: nil)
     }
 
@@ -49,6 +67,33 @@ class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
     func dismissPhotoPicker(withTLPHAssets: [TLPHAsset]) {
         // use selected order, fullresolution image
         self.selectedAssets = withTLPHAssets
+        getFirstSelectedImage()
+    }
+    
+    func getFirstSelectedImage() {
+        if let asset = self.selectedAssets.first {
+            if let image = asset.fullResolutionImage {
+                print(image)
+                self.label.text = "local storage image"
+                self.imageView.image = image
+            }else {
+                print("Can't get image at local storage, try download image")
+                asset.cloudImageDownload(progressBlock: { [weak self] (progress) in
+                    DispatchQueue.main.async {
+                        self?.label.text = "download \(100*progress)%"
+                        print(progress)
+                    }
+                }, completionBlock: { [weak self] (image) in
+                    if let image = image {
+                        //use image
+                        DispatchQueue.main.async {
+                            self?.label.text = "complete download"
+                            self?.imageView.image = image
+                        }
+                    }
+                })
+            }
+        }
     }
 
     func dismissPhotoPicker(withPHAssets: [PHAsset]) {

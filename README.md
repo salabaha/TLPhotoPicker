@@ -3,9 +3,9 @@
 [![Version](https://img.shields.io/cocoapods/v/TLPhotoPicker.svg?style=flat)](http://cocoapods.org/pods/TLPhotoPicker)
 [![License](https://img.shields.io/cocoapods/l/TLPhotoPicker.svg?style=flat)](http://cocoapods.org/pods/TLPhotoPicker)
 [![Platform](https://img.shields.io/cocoapods/p/TLPhotoPicker.svg?style=flat)](http://cocoapods.org/pods/TLPhotoPicker)
-![Swift](https://img.shields.io/badge/%20in-swift%203.0-orange.svg)
+![Swift](https://img.shields.io/badge/%20in-swift%204.0-orange.svg)
 
-## Written in Swift 3
+## Written in Swift 4
 
 TLPhotoPicker enables application to pick images and videos from multiple smart album in iOS, similar to the current facebook app.
 
@@ -26,15 +26,22 @@ TLPhotoPicker enables application to pick images and videos from multiple smart 
 - async phasset request and displayed cell.
   - scrolling performance is better than facebook in displaying video assets collection.
 - custom cell
-- reload of changes that occur in the Photos library. 
+- reload of changes that occur in the Photos library.
+- support iCloud Photo Library
 
 | Smart album collection | LivePhotoCell | VideoPhotoCell  | PhotoCell | CustomCell(instagram) |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
 | ![Facebook Picker](Images/smartalbum.png)  | ![LivePhotoCell](Images/livephotocell.png)  | ![VideoPhotoCell](Images/videophotocell.png)  | ![PhotoCell](Images/photocell.png)  | ![PhotoCell](Images/customcell.png)  |
 
+Custom Camera Cell
+
+| Live CameraCell |
+| ------------- |
+| ![Like Line](Images/custom_cameracell.gif)
+
 ## Requirements 
 
-- Swift 3.0
+- Swift 4.0 ( Swift 3.0 -> use 'version 1.2.7' )
 - iOS 9.1 (live photos)
 
 ## Installation 
@@ -81,9 +88,18 @@ class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
 }
 
 //Custom Cell must subclass TLPhotoCollectionViewCell
+
 class CustomCell_Instagram: TLPhotoCollectionViewCell {
 
 }
+
+//If you want custom camera cell?
+//only used camera cell
+[Sample](https://github.com/tilltue/TLPhotoPicker/blob/master/Example/TLPhotoPicker/CustomCameraCell.swift)
+
+@objc open func selectedCell()
+@objc open func willDisplayCell()
+@objc open func endDisplayingCell()
 ```
 - use closure
 ```swift
@@ -122,6 +138,9 @@ public struct TLPHAsset {
     public var type: AssetType
     // get full resolution image 
     public var fullResolutionImage: UIImage?
+    // get async icloud image (download)
+    @discardableResult
+    public func cloudImageDownload(progressBlock: @escaping (Double) -> Void, completionBlock:@escaping (UIImage?)-> Void ) -> PHImageRequestID?
     // get original asset file name
     public var originalFileName: String?
 }
@@ -141,6 +160,11 @@ public struct TLPhotosPickerConfigure {
     public var usedPrefetch = false
     public var allowedLivePhotos = true
     public var allowedVideo = true
+    public var allowedVideoRecording = true
+    public var maxVideoDuration:TimeInterval? = nil
+    public var autoPlay = true
+    public var muteAudio = true
+    public var mediaType: PHAssetMediaType? = nil
     public var numberOfColumn = 3
     public var maxSelectedAssets: Int? = nil //default: inf
     public var selectedColor = UIColor(red: 88/255, green: 144/255, blue: 255/255, alpha: 1.0)
@@ -149,6 +173,7 @@ public struct TLPhotosPickerConfigure {
     public var videoIcon = TLBundle.podBundleImage(named: "video")
     public var placeholderIcon = TLBundle.podBundleImage(named: "insertPhotoMaterial")
     public var nibSet: (nibName: String, bundle:Bundle)? = nil // custom cell
+    public var cameraCellNibSet: (nibName: String, bundle:Bundle)? = nil // custom camera cell
     public init() {
     }
 }
