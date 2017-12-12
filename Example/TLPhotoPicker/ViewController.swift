@@ -24,8 +24,8 @@ class ViewController: UIViewController,TLPhotosPickerViewControllerDelegate {
         }
         var configure = TLPhotosPickerConfigure()
         configure.numberOfColumn = 3
-        configure.mediaType = .video
-        configure.usedCameraButton = false
+//        configure.mediaType = .video
+//        configure.usedCameraButton = false
         //configure.maxSelectedAssets = 10
         //configure.nibSet = (nibName: "CustomCell_Instagram", bundle: Bundle.main)
         viewController.configure = configure
